@@ -13,11 +13,13 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.mitchellbosecke.pebble.error.AttributeNotFoundException;
+import com.mitchellbosecke.pebble.error.MemberInvocationException;
 import com.mitchellbosecke.pebble.error.PebbleException;
 import com.mitchellbosecke.pebble.extension.NodeVisitor;
 import com.mitchellbosecke.pebble.node.ArgumentsNode;
@@ -148,8 +150,9 @@ public class GetAttributeExpression implements Expression<Object> {
      * @param member
      * @param argumentValues
      * @return
+     * @throws MemberInvocationException 
      */
-    private Object invokeMember(Object object, Member member, Object[] argumentValues) {
+    private Object invokeMember(Object object, Member member, Object[] argumentValues) throws MemberInvocationException {
         Object result = null;
         try {
             if (member != null) {
@@ -163,7 +166,9 @@ public class GetAttributeExpression implements Expression<Object> {
         } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
             e.printStackTrace();
 
-        }
+        } catch (RuntimeException e) {
+			throw new MemberInvocationException(e, String.format("Exception in member [%s] invocation with arguments [%s] for object [%s]", member, Arrays.toString(argumentValues), object));
+		}
         return result;
     }
 
