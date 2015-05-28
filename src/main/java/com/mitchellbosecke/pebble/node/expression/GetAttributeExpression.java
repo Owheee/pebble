@@ -18,6 +18,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.mitchellbosecke.pebble.error.AttributeNotFoundException;
 import com.mitchellbosecke.pebble.error.MemberInvocationException;
 import com.mitchellbosecke.pebble.error.PebbleException;
@@ -36,6 +39,8 @@ import com.mitchellbosecke.pebble.template.PebbleTemplateImpl;
  * 
  */
 public class GetAttributeExpression implements Expression<Object> {
+	
+	private static final Logger logger = LoggerFactory.getLogger(GetAttributeExpression.class);
 
     private final Expression<?> node;
 
@@ -164,8 +169,9 @@ public class GetAttributeExpression implements Expression<Object> {
                 }
             }
         } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-            e.printStackTrace();
-
+        	String message = String.format("Skip invocation of member [%s] with arguments [%s] for object [%s]", member, Arrays.toString(argumentValues), object);
+        	logger.info(message, e);
+        	logger.warn(message + ": " + e.getLocalizedMessage());
         } catch (RuntimeException e) {
 			throw new MemberInvocationException(e, String.format("Exception in member [%s] invocation with arguments [%s] for object [%s]", member, Arrays.toString(argumentValues), object));
 		}
